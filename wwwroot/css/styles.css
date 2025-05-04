@@ -1,0 +1,45 @@
+﻿html, body {
+    padding: 0;
+    margin: 0;
+    height: 100%;
+    width: 100%;
+    font-family: Arial, sans-serif;
+}
+
+#mapTitle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    background-color: #2c3e50;
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    padding: 12px 0;
+    z-index: 100;
+}
+
+#incomeFilter {
+    position: absolute;
+    top: 50px; /* Directly below title */
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 10px 14px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    z-index: 101;
+    font-size: 14px;
+}
+
+    #incomeFilter input {
+        width: 90px;
+        margin: 0 8px;
+    }
+
+#viewDiv {
+    height: calc(100% - 60px); /* Accommodate title + filter */
+    margin-top: 60px;
+    width: 100%;
+}
