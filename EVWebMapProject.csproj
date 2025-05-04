@@ -6,4 +6,24 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Include="css\styles.css" />
+    <Content Include="libs\jquery.min.js" />
+    <Content Include="libs\jquery.min_files\12080c50-1ff5-4afa-8b34-c9be16fd2a27.png" />
+    <Content Include="libs\jquery.min_files\6eadd68b-471f-4404-977b-9077ca3b742b.png" />
+    <Content Include="libs\jquery.min_files\api.js.download" />
+    <Content Include="libs\jquery.min_files\b07c83b4-62d3-4ea3-aca2-93e665a1aa55.png" />
+    <Content Include="libs\jquery.min_files\cb=gapi%281%29.loaded_0" />
+    <Content Include="libs\jquery.min_files\cb=gapi.loaded_0" />
+    <Content Include="libs\jquery.min_files\cb=gapi.loaded_1" />
+    <Content Include="libs\jquery.min_files\conversation-small-cmjjxogj.css" />
+    <Content Include="libs\jquery.min_files\FormattedText-kb0ehjj7.css" />
+    <Content Include="libs\jquery.min_files\googleapis.proxy.js.download" />
+    <Content Include="libs\jquery.min_files\proxy.html" />
+    <Content Include="libs\jquery.min_files\root-eh80jqkj.css" />
+    <Content Include="libs\jquery.min_files\saved_resource.html" />
+    <Content Include="libs\jquery.min_files\sora-mutf8tav.webp" />
+    <Content Include="libs\jquery.min_files\unnamed.jpg" />
+  </ItemGroup>
+
 </Project>
