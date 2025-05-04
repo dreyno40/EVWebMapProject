@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <Content Include="css\styles.css" />
+    <Content Include="index.html" />
+    <Content Include="js\main.js" />
     <Content Include="libs\jquery.min.js" />
     <Content Include="libs\jquery.min_files\12080c50-1ff5-4afa-8b34-c9be16fd2a27.png" />
     <Content Include="libs\jquery.min_files\6eadd68b-471f-4404-977b-9077ca3b742b.png" />
@@ -24,6 +26,10 @@
     <Content Include="libs\jquery.min_files\saved_resource.html" />
     <Content Include="libs\jquery.min_files\sora-mutf8tav.webp" />
     <Content Include="libs\jquery.min_files\unnamed.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
   </ItemGroup>
 
 </Project>
