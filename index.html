@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Census Income and Fast Charging Station Explorer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+    <div id="mapTitle">Census Income and Fast Charging Station Explorer</div>
+
+    <div id="incomeFilter">
+        <label>Min Income: <input type="number" id="minIncome" value="0" /></label>
+        <label>Max Income: <input type="number" id="maxIncome" value="200000" /></label>
+        <button id="applyFilter">Filter Tracts</button>
+    </div>
+
+    <div id="viewDiv"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://js.arcgis.com/4.29/"></script>
+
+    <script>
+        let tractLayer;
+
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/layers/MapImageLayer",
+            "esri/renderers/SimpleRenderer",
+            "esri/widgets/LayerList",
+            "esri/widgets/BasemapGallery",
+            "esri/widgets/Legend",
+            "esri/widgets/Expand"
+        ], function (
+            Map, MapView, FeatureLayer, MapImageLayer, SimpleRenderer,
+            LayerList, BasemapGallery, Legend, Expand
+        ) {
+            const map = new Map({
+                basemap: "streets-navigation-vector"
+            });
+
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [-78.6382, 35.7796], // Raleigh, NC
+                zoom: 7
+            });
+
+            // Census Tracts
+            tractLayer = new FeatureLayer({
+                url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Median_Income_by_Race_and_Age_Selp_Emp_Boundaries/FeatureServer/2",
+                title: "Census Tracts: Median Income",
+                outFields: ["B19049_001E"],
+                renderer: {
+                    type: "class-breaks",
+                    field: "B19049_001E",
+                    classBreakInfos: [
+                        { minValue: 0, maxValue: 25000, symbol: { type: "simple-fill", color: "#f7fbff", outline: { color: "#ccc", width: 0.2 } }, label: "< $25,000" },
+                        { minValue: 25001, maxValue: 50000, symbol: { type: "simple-fill", color: "#c6dbef", outline: { color: "#ccc", width: 0.2 } }, label: "$25,001 - $50,000" },
+                        { minValue: 50001, maxValue: 75000, symbol: { type: "simple-fill", color: "#6baed6", outline: { color: "#ccc", width: 0.2 } }, label: "$50,001 - $75,000" },
+                        { minValue: 75001, maxValue: 100000, symbol: { type: "simple-fill", color: "#2171b5", outline: { color: "#ccc", width: 0.2 } }, label: "$75,001 - $100,000" },
+                        { minValue: 100001, maxValue: 1000000, symbol: { type: "simple-fill", color: "#08306b", outline: { color: "#ccc", width: 0.2 } }, label: "> $100,000" }
+                    ]
+                },
+                popupTemplate: {
+                    title: "Census Tract",
+                    content: "<b>Median Household Income:</b> ${B19049_001E}"
+                }
+            });
+
+            // EV Charging Stations with visualVariables
+            const evLayer = new FeatureLayer({
+                url: "https://services9.arcgis.com/RHVPKKiFTONKtxq3/arcgis/rest/services/Alternate_Fuel/FeatureServer/0",
+                title: "EV Charging Stations",
+                outFields: ["*"],
+                renderer: new SimpleRenderer({
+                    symbol: {
+                        type: "simple-marker",
+                        color: "purple",
+                        outline: { color: "white" }
+                    },
+                    visualVariables: [
+                        {
+                            type: "size",
+                            field: "EV_DC_Fast_Ports",
+                            stops: [
+                                { value: 1, size: 6 },
+                                { value: 5, size: 12 },
+                                { value: 10, size: 18 }
+                            ]
+                        }
+                    ]
+                }),
+                popupTemplate: {
+                    title: "{Station_Name}",
+                    content: async function (feature) {
+                        const graphic = feature.graphic;
+                        const query = tractLayer.createQuery();
+                        query.geometry = graphic.geometry;
+                        query.spatialRelationship = "intersects";
+                        query.returnGeometry = false;
+                        query.outFields = ["B19049_001E"];
+                        const results = await tractLayer.queryFeatures(query);
+                        let income = "N/A";
+                        if (results.features.length > 0) {
+                            income = results.features[0].attributes.B19049_001E?.toLocaleString();
+                        }
+
+                        return `
+                  <b>Fuel Type:</b> ${graphic.attributes.FUEL_TYPE}<br>
+                  <b>Access:</b> ${graphic.attributes.ACCESS_DAYS_TIME}<br>
+                  <b>City:</b> ${graphic.attributes.CITY}<br>
+                  <b>ZIP:</b> ${graphic.attributes.ZIP}<br>
+                  <b>EV DC Fast Ports:</b> ${graphic.attributes.EV_DC_Fast_Ports}<br>
+                  <b>Census Tract Median Income:</b> $${income}
+                `;
+                    }
+                }
+            });
+
+            // ✅ NCDOT STIP MapImageLayer
+            const ncdotLayer = new MapImageLayer({
+                url: "https://gis11.services.ncdot.gov/arcgis/rest/services/NCDOT_STIP/MapServer",
+                title: "NCDOT STIP (MapImageLayer)"
+            });
+
+            map.addMany([ncdotLayer, tractLayer, evLayer]);
+
+            // jQuery income filter
+            $(document).ready(function () {
+                $("#applyFilter").on("click", function () {
+                    const min = parseInt($("#minIncome").val());
+                    const max = parseInt($("#maxIncome").val());
+                    tractLayer.definitionExpression = `B19049_001E >= ${min} AND B19049_001E <= ${max}`;
+                });
+            });
+
+            view.ui.add(new LayerList({ view }), "top-right");
+            view.ui.add(new Expand({ view, content: new BasemapGallery({ view }) }), "top-left");
+            view.ui.add(new Legend({ view }), "bottom-right");
+        });
+    </script>
+</body>
+</html>
